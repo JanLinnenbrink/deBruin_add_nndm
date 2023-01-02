@@ -8,7 +8,7 @@
 # *****************************************************************************
 Sys.sleep(round(runif(1, min = 1, max = 240)))
 # ****** load required libraries *******
-.libPaths("/home/j/j_bahl03/R")
+.libPaths("/home/j/jlinnenb/r_packages")
 library(ranger)
 library(terra)
 library(parallel)
@@ -16,12 +16,9 @@ library(parallel)
 # ************ GLOBALS ***************
 samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
-# infolder1 <- "../data"
-# infolder2 <- "../samples"
-# outfolder <- "../CVresults"
-infolder1 <- "~/deBruin_add_nndm/data"
-infolder2 <- "~/deBruin_add_nndm/samples"
-outfolder <- "~/deBruin_add_nndm/CVresults"
+infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
+infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults"
 startseed <- 1234567
 n_samp    <- 100  # number of sample replicates (for each design)
 

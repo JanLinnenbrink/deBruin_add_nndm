@@ -1,7 +1,7 @@
-setwd("~/iloek_job/wadoux/deBruin_add_nndm/")
-save_to <- "~/iloek_job/wadoux/deBruin_add_nndm/samples"
-samples_root <- "~/iloek_job/wadoux/investigate_spatial_validation/debruin/samples/"
-samples <- 700
+setwd("scratch/tmp/jlinnenb/deBruin_add_nndm/")
+save_to <- "scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
+samples_root <- "scratch/tmp/jlinnenb/samples/"
+samples <- 700 # adjust to 5000
 
 for (method in c("clusterGapped", "clusterMedium", "simpleRandom", "clusterStrong", "regular")) {
   real_AGB <- list.files(file.path(samples_root, method), glob2rx("AGBdata*.Rdata"))

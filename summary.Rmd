@@ -83,8 +83,7 @@ infolder  <- "./CVresults"
 outfolder <- "./material"
 
 mets <- c("exhaustive", "random", "spatial", "intensity",
-          "modelbased", "heteroscedastic", "nndm", 
-          "nndm_cast", "nndm_cast_02", "nndm_cast_09", "nndm_70000")
+          "modelbased", "heteroscedastic", "nndm", "knndm", "bnndm")
 
 colnms <- c("method", "variate", "design", "number", "RMSE", "MEC")
 outtab <- data.frame(matrix(NA, 0, 10))
@@ -133,21 +132,29 @@ ggplot(data=outtab[outtab$variate == "OCS",]) +
 ```
 
 ```{r, eval=T}
-mytab <- outtab[outtab$variate == "AGB",]
+mytab <- outtab
 # mytab <- mytab[mytab$number < 6,]
 mytab$rRMSE <- NA
 mytab$rMEC  <- NA
 
-for (design in unique(mytab$design)) {
-  for (number in 1:100) {
-    measurement <- which(mytab$design == design & mytab$number == number)
-    validation <- which(mytab$design == design & mytab$number == number & mytab$method == "exhaustive")
-    mytab$rRMSE[measurement] <- 100 * (mytab$RMSE[measurement] - mytab$RMSE[validation])/
+numbers <- mytab[mytab$variate == "OCS" & mytab$method=="exhaustive" & mytab$design=="clusterGapped",]$number
+
+mytab <- mytab[mytab$number %in% numbers, ]
+
+for(variate in unique(mytab$variate)) {
+  for (design in unique(mytab$design)) {
+    for (number in unique(mytab$number)) {
+      measurement <- which(mytab$variate==variate & mytab$design == design & mytab$number == number)
+      validation <- which(mytab$variate==variate & mytab$design == design & mytab$number == number & mytab$method == "exhaustive")
+      mytab$rRMSE[measurement] <- 100 * (mytab$RMSE[measurement] - mytab$RMSE[validation])/
         mytab$RMSE[validation]
-    mytab$rMEC[measurement] <- 100 * (mytab$MEC[measurement] - mytab$MEC[validation])/
+      mytab$rMEC[measurement] <- 100 * (mytab$MEC[measurement] - mytab$MEC[validation])/
         mytab$MEC[validation]
+    }
   }
 }
+
+
 
 # boxplot(rRMSE~method, data=mytab)
 
@@ -164,14 +171,23 @@ mytab$method[mytab$method == "intensity"] <- "d_intensity"
 mytab$method[mytab$method == "modelbased"] <- "e_modelbased"
 mytab$method[mytab$method == "heteroscedastic"] <- "f_heteroscedastic"
 mytab$method[mytab$method == "nndm"] <- "g_nndm"
+mytab$method[mytab$method == "knndm"] <- "h_knndm"
+mytab$method[mytab$method == "bnndm"] <- "i_bnndm"
 
 
 
-levels(as.factor(mytab$design))
-
-ggplot(data=mytab[(mytab$method != "a_exhaustive" & mytab$method != "b_random" & mytab$method != "c_spatial" & mytab$method != "d_intensity" & mytab$method != "e_modelbased" & mytab$method != "f_heteroscedastic"),]) +
+(p_r <- ggplot(data=dat) +
+  geom_hline(yintercept = 0, size=0.5) +
+    scale_x_discrete() +
+    geom_vline(xintercept=c(1.5,2.5,3.5,4.5,5.5,6.5,7.5), linetype=2, alpha=0.5, color="grey60") +
   geom_boxplot(aes(x=method, y=rRMSE, color=design)) +
-  ggtitle("AGB: relative RMSE (%) by CV Method")
+  ggtitle("AGB: relative RMSE (%) by CV Method") +
+  theme_bw() +
+  facet_wrap(~variate))
+
+ggsave(file.path(outfolder, "plot_rmse.pdf"), p_r)
+
+
 ```
 
 ```{r, eval=T}
@@ -206,6 +222,7 @@ mytab$method[mytab$method == "intensity"] <- "d_intensity"
 mytab$method[mytab$method == "modelbased"] <- "e_modelbased"
 mytab$method[mytab$method == "heteroscedastic"] <- "f_heteroscedastic"
 mytab$method[mytab$method == "nndm"] <- "g_nndm"
+mytab$method[mytab$method == "knndm"] <- "h_knndm"
 
 
 

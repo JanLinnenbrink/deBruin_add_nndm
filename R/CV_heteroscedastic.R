@@ -8,7 +8,7 @@
 # *****************************************************************************
 Sys.sleep(round(runif(1, min = 1, max = 240)))
 # ****** load required libraries *******
-.libPaths("/home/j/j_bahl03/R")
+.libPaths("/home/j/jlinnenb/r_packages")
 library(sf)
 library(gstat)
 library(terra)
@@ -18,10 +18,10 @@ library(parallel)
 
 # ************ GLOBALS ***************
 
-infolder1 <- "~/deBruin_add_nndm/CVresults/modelbased"
-infolder2 <- "~/deBruin_add_nndm/CVresults/random"
-infolder3 <- "~/deBruin_add_nndm/data"
-outfolder <- "~/deBruin_add_nndm/CVresults/heteroscedastic"
+infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/modelbased"
+infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/random"
+infolder3 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/heteroscedastic"
 nsim <- 200        # number of sequential Gaussian simulations
 i_CV <- 1:3  # cross validation replications analysed
 startseed <- 1234567

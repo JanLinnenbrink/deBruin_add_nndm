@@ -8,7 +8,7 @@
 # *****************************************************************************
 
 # ****** load required libraries *******
-.libPaths("/home/j/j_bahl03/R")
+.libPaths("/home/j/jlinnenb/r_packages")
 library(spatstat)
 library(terra)
 library(sf)
@@ -17,12 +17,10 @@ library(parallel)
 
 # ************ GLOBALS ***************
 
-infolder1 <- "~/deBruin_add_nndm/data"
-infolder2 <- "~/deBruin_add_nndm/CVresults/random"
-outfolder <- "~/deBruin_add_nndm/CVresults/intensity"
-# infolder1 <- "../data"
-# infolder2 <- "../CVresults/random"
-# outfolder <- "../CVresults/intensity"
+infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
+infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/random"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/intensity"
+
 CRSlaea   <- paste0("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 ",
                     "+ellps=GRS80 +units=m +no_defs")
 

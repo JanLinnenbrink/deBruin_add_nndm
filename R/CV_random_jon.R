@@ -8,6 +8,7 @@
 # *****************************************************************************
 
 # ****** load required library *******
+.libPaths("/home/j/jlinnenb/r_packages/")
 library(ranger)
 library(parallel)
 
@@ -15,8 +16,8 @@ library(parallel)
 samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
 
-infolder <- "~/deBruin_add_nndm/samples"
-outfolder <- "~/deBruin_add_nndm/CVresults"
+infolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults"
 startseed <- 1234567
 n_CV   <- 3  # number of cross validation replications
 n_samp <- 100  # number of sample replicates (for each design)

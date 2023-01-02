@@ -9,7 +9,7 @@ current_index <- 401:450
 # *****************************************************************************
 
 # ****** load required libraries *******
-.libPaths("/home/j/j_bahl03/R")
+.libPaths("/home/j/jlinnenb/r_packages")
 
 library(sf)
 library(gstat)
@@ -19,13 +19,9 @@ library(parallel)
 
 
 # ************ GLOBALS ***************
-infolder1 <- "~/deBruin_add_nndm/data"
-infolder2 <- "~/deBruin_add_nndm/CVresults/random"
-outfolder <- "~/deBruin_add_nndm/CVresults/modelbased"
-
-# infolder1 <- "~/iloek_job/wadoux/investigate_spatial_validation/debruin/data"
-# infolder2 <- "~/iloek_job/wadoux/investigate_spatial_validation/debruin/CVresults/random"
-# outfolder <- "~/iloek_job/wadoux/investigate_spatial_validation/debruin/CVresults/modelbased"
+infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
+infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/random"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/modelbased"
 
 nsim <- 200 # number of sequential Gaussian simulations
 i_CV <- 1:3

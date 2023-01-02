@@ -11,21 +11,18 @@
 # Sys.sleep(round(runif(1, min = 1, max = 240)))
 
 # ****** load required library *******
+.libPaths("/home/j/jlinnenb/r_packages/")
 library(ranger)
-# library(NNDM)
-source("~/R/NNDM/R/nndm.R")
+library(CAST)
 library(sf)
 library(raster)
 library(caret)
 library(parallel)
-source("/home/j/j_bahl03/R/CAST/R/global_validation.R")
 
 # ************ GLOBALS ***************
-infolder <- "~/deBruin_add_nndm/samples"
-outfolder <- "~/deBruin_add_nndm/CVresults"
-# outfolder <- "~/iloek_job/wadoux/investigate_spatial_validation/debruin/CVresults"
-datafolder <- "~/deBruin_add_nndm/data"
-folder_name <- "nndm_rerun"
+infolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/nndm"
+datafolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
 
 # csv_file <- file.path(outfolder, folder_name, "nndm_processing.csv")
 # runs <- read.csv(csv_file)
@@ -45,15 +42,12 @@ folder_name <- "nndm_rerun"
 # write.csv(runs, file = csv_file, row.names = FALSE)
 
 # 20000 phi and 0.5 min train
-n <- 700 # usually 5000
-n_CV <- 3
+n <- 700 # usually 5000 (700)
+n_CV <- 3 # usually 100 (3)
 
 # create outfolders if they don't exist
 if(!dir.exists(outfolder))
   dir.create(outfolder)
-
-if(!dir.exists(paste0(outfolder, folder_name)))
-  dir.create(paste0(outfolder, folder_name))
 
 # ************ FUNCTIONS ***************
 
@@ -91,20 +85,18 @@ nndmCV <- function(smpl, number, variate) {
     sample_sf <- pts
   }
   
-  agb_raster <- raster::raster(file.path(datafolder, "agb.tif")) # load agb raster
+  agb_raster <- raster::raster(file.path(datafolder, "agb_resampled.tif")) # load agb raster + instead of "agb.tif"
   
   folds <- list()
   
   for(i_CV in 1:n_CV) {
     
-    raster_subset <- sampleRandom(agb_raster, n, sp=T) # subset raster
-    raster_sf <- st_as_sf(raster_subset) # as sf
     sample_subset <- st_cast(st_sample(sample_sf, n), to = "POINT") # subset sample
-    st_crs(sample_subset) <- st_crs(raster_sf) # set crs
+    st_crs(sample_subset) <- st_crs(agb_raster) # set crs
     
     #st_as_sf(raster::rasterToPoints(agb_raster[[1]], spatial = TRUE))
-    nndm <- nndm(tpoints = sample_subset, ppoints = raster_sf, phi = 20000, min_train = 0.5)
-    # save(nndm, file="./nndm.Rdata")
+    nndm <- nndm(tpoints = sample_subset, modeldomain = agb_raster, min_train = 0.5)
+    #save(nndm, file="./nndm.Rdata") # not run
     
     # Evaluate RF model using NDM CV
     trainControl_NNDM <- trainControl(method = "cv",
@@ -133,7 +125,7 @@ nndmCV <- function(smpl, number, variate) {
   }
   
   fname  <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".Rdata")
-  f_out  <- file.path(outfolder,folder_name, fname)
+  f_out  <- file.path(outfolder, fname)
   save(RMSE, folds, file=f_out)
 }
 
@@ -142,8 +134,8 @@ nndmCV <- function(smpl, number, variate) {
 
 samples <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
-n_samp <- 100
-cores <- 20
+n_samp <- 100 # 100
+cores <- 20 # 20
 
 mclapply(seq(n_samp), function(i) {
   for(smpl in samples) {

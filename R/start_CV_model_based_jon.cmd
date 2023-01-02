@@ -25,9 +25,9 @@
 #SBATCH --output output_model_based.dat
 
 # send mail to this address
-#SBATCH --mail-user=jbahlmann@uni-muenster.de
+#SBATCH --mail-user=jlinnenb@uni-muenster.de
 
 # run the application
-module add palma/2020b
+module add palma/2021a
 module add foss R GDAL
 R CMD BATCH --vanilla CV_model_based_jon.R

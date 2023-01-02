@@ -1,0 +1,17 @@
+
+The following have been reloaded with a version change:
+  1) palma/2019a => palma/2021a
+
+################################# JOB REPORT ##################################
+Job ID: 13191480
+Cluster: palma2
+User/Group: jlinnenb/u0dawin
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 20
+CPU Utilized: 03:10:31
+CPU Efficiency: 93.54% of 03:23:40 core-walltime
+Job Wall-clock time: 00:10:11
+Memory Utilized: 10.66 GB
+Memory Efficiency: 26.65% of 40.00 GB
+###############################################################################

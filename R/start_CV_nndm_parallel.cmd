@@ -10,13 +10,13 @@
 #SBATCH --mem=40GB
 
 # set a partition
-#SBATCH --partition normal
+#SBATCH --partition long
 
 # set max wallclock time
 #SBATCH --time=90:00:00
 
 # set name of job
-#SBATCH --job-name=nndm_add_deb
+#SBATCH --job-name=nndm
 
 # mail alert at start, end and abortion of execution
 #SBATCH --mail-type=ALL
@@ -25,9 +25,9 @@
 #SBATCH --output output_nndm.dat
 
 # send mail to this address
-#SBATCH --mail-user=jbahlmann@uni-muenster.de
+#SBATCH --mail-user=jlinnenb@uni-muenster.de
 
 # run the application
-module add palma/2020b
+module add palma/2021a
 module add foss R GDAL
 R CMD BATCH --vanilla CV_nndm_parallel.R

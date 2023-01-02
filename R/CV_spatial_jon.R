@@ -8,7 +8,7 @@
 # *****************************************************************************
 
 # ****** load required libraries *******
-.libPaths("/home/j/j_bahl03/R")
+.libPaths("/home/j/jlinnenb/R")
 library(ranger)
 library(sperrorest)
 library(parallel)
@@ -17,8 +17,8 @@ library(parallel)
 # ************ GLOBALS ***************
 samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
-infolder <- "~/deBruin_add_nndm/samples"
-outfolder <- "~/deBruin_add_nndm/CVresults"
+infolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults"
 startseed <- 1234567
 n_CV      <- 3  # number of cross validation replications
 n_samp    <- 100  # # number of sample replicates (for each design)
