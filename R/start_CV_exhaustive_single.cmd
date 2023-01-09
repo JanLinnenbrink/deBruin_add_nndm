@@ -30,4 +30,4 @@
 # run the application
 module add palma/2021a
 module add foss R GDAL
-R CMD BATCH --vanilla CV_exhaustive_single.R
+R CMD BATCH --vanilla CV_exhaustive_local.R

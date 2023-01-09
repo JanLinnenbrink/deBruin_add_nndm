@@ -6,7 +6,6 @@
 # Science and Remote Sensing, email: sytze.debruin@wur.nl
 # May 3, 2022
 # *****************************************************************************
-Sys.sleep(round(runif(1, min = 1, max = 240)))
 # ****** load required libraries *******
 .libPaths("/home/j/jlinnenb/r_packages")
 library(ranger)
@@ -30,13 +29,18 @@ if(!dir.exists(outfolder))
 if(!dir.exists(paste0(outfolder, "/exhaustive")))
   dir.create(paste0(outfolder, "/exhaustive"))
 
+if(!file.exists(file.path(outfolder, "exhaustive", "runs.csv"))) {
+  write.csv(data.frame("runs"=0), file.path(outfolder, "exhaustive", "runs.csv"))
+}
+
 csv_file <- file.path(outfolder, "exhaustive", "runs.csv")
 runs <- read.csv(csv_file)
 lastIndex <- runs[nrow(runs),1]
-thisIndex <- lastIndex + 1
+thisIndex <- 86
 print(paste0("this Index is: ", thisIndex))
 runs[thisIndex,1] <- thisIndex
 write.csv(runs, file = csv_file, row.names = FALSE)
+
 
 # download data from https://doi.org/10.5281/zenodo.6513429
 # ****** load input raster data ******
@@ -118,7 +122,7 @@ exhaustive <- function(smpl, number, variate, seed){
 # ************ CALL THE FUNCTIONS ************ 
 mclapply(list("AGB", "OCS"), function(x) {
   for(smpl in samples) {
-    i <- thisIndex
+    i <- 86
     exhaustive(smpl, i, x, startseed)
   }
 }, mc.cores = 2)

@@ -1,0 +1,18 @@
+
+The following have been reloaded with a version change:
+  1) palma/2019a => palma/2021a
+
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=13279697.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
+################################# JOB REPORT ##################################
+Job ID: 13279697
+Cluster: palma2
+User/Group: jlinnenb/u0dawin
+State: OUT_OF_MEMORY (exit code 0)
+Nodes: 1
+Cores per node: 20
+CPU Utilized: 16:58:31
+CPU Efficiency: 60.58% of 1-04:01:20 core-walltime
+Job Wall-clock time: 01:24:04
+Memory Utilized: 38.12 GB
+Memory Efficiency: 76.24% of 50.00 GB
+###############################################################################

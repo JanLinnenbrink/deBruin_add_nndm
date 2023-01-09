@@ -2,17 +2,3 @@
 The following have been reloaded with a version change:
   1) palma/2019a => palma/2021a
 
-slurmstepd: error: *** JOB 13190773 ON r07n06 CANCELLED AT 2022-12-23T15:26:58 ***
-################################# JOB REPORT ##################################
-Job ID: 13190773
-Cluster: palma2
-User/Group: jlinnenb/u0dawin
-State: CANCELLED (exit code 0)
-Nodes: 1
-Cores per node: 20
-CPU Utilized: 19:48:39
-CPU Efficiency: 62.68% of 1-07:36:20 core-walltime
-Job Wall-clock time: 01:34:49
-Memory Utilized: 11.82 GB
-Memory Efficiency: 29.55% of 40.00 GB
-###############################################################################

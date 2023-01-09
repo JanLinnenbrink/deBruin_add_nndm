@@ -1,7 +1,7 @@
 setwd("scratch/tmp/jlinnenb/deBruin_add_nndm/")
 save_to <- "scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
 samples_root <- "scratch/tmp/jlinnenb/samples/"
-samples <- 700 # adjust to 5000
+samples <- 5000 # adjust to 5000
 
 for (method in c("clusterGapped", "clusterMedium", "simpleRandom", "clusterStrong", "regular")) {
   real_AGB <- list.files(file.path(samples_root, method), glob2rx("AGBdata*.Rdata"))

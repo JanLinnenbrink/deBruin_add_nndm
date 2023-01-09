@@ -90,7 +90,7 @@ randomCV <- function(smpl, number, variate, seed){
     }
     
     MEC[i_CV]  <- 1 - SSR/SST
-    RMSE[i_CV] <- sqrt(SSR/n)
+    RMSE[i_CV] <- CAST::global_validation(RFmodel)["RMSE"][[1]]
     seed <- seed + 1
     pts_df  <- cbind(pts_df, tmp=resids)
     names(pts_df)[i_CV + 2] <- paste0("res", sprintf("%03d", i_CV))

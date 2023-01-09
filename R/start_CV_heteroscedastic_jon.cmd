@@ -10,7 +10,7 @@
 #SBATCH --mem=30GB
 
 # set a partition
-#SBATCH --partition normal
+#SBATCH --partition long
 
 # set max wallclock time
 #SBATCH --time=72:00:00
