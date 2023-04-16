@@ -84,6 +84,7 @@ rm(agg_pnts, AGBstack)
 
 nanID <- which(apply(COVdata, 1, function(x) any(is.na(x))))
 COVdata <- COVdata[-nanID,]
+COVdata$glc2017 <- as.factor(COVdata$glc2017)
 sf_pnts <- sf_pnts[-nanID,]
 
 # find files with all design realizations
@@ -112,17 +113,22 @@ mclapply(f_ins, function(f_in) {
   # Predict variate at prediction grid locations
   # get sample data
   fsamp <- paste0(variate, "data", number, ".Rdata")
-  load(file.path("../samples", design, fsamp))
+  load(file.path("/scratch/tmp/jlinnenb/deBruin_add_nndm/samples", design, fsamp))
   
   # fit RF on the entire sample
   set.seed(startseed)
   if(variate == "AGB"){
     if (names(AGBdata)[1] == "ID") {AGBdata <- AGBdata[,c(2:23)]}
-    RFmodel <- ranger(agb~., AGBdata, respect.unordered.factors=TRUE)
+    mtry <- 4
+    pgrid <- expand.grid(mtry=mtry, splitrule="variance", min.node.size=5)
+    RFmodel <- caret::train(agb~., AGBdata,respect.unordered.factors=TRUE, method = "ranger",
+                            tuneGrid=pgrid, num.trees=500)
   } else{
     if (names(OCSdata)[1] == "ID") {OCSdata <- OCSdata[,c(2:23)]}
-    RFmodel <- ranger(ocs~., OCSdata, respect.unordered.factors=TRUE)
-  }
+    mtry <- 4
+    pgrid <- expand.grid(mtry=mtry, splitrule="variance", min.node.size=5)
+    RFmodel <- caret::train(ocs~., OCSdata,respect.unordered.factors=TRUE, method = "ranger",
+                            tuneGrid=pgrid, num.trees=500)  }
   
   # predict on grid
   preds <- predict(RFmodel, COVdata)[[1]]

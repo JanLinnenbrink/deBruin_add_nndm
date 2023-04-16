@@ -13,7 +13,8 @@ library(spatstat)
 library(terra)
 library(sf)
 library(parallel)
-
+library(caret)
+library(CAST)
 
 # ************ GLOBALS ***************
 

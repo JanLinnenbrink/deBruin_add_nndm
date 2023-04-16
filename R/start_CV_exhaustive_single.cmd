@@ -13,7 +13,7 @@
 #SBATCH --partition normal
 
 # set max wallclock time
-#SBATCH --time=01:30:00
+#SBATCH --time=02:00:00
 
 # set name of job
 #SBATCH --job-name=exh_one

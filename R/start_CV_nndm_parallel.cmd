@@ -4,16 +4,16 @@
 #SBATCH --nodes=1
 
 # set the number of CPU cores per node
-#SBATCH --ntasks-per-node 20
+#SBATCH --ntasks-per-node 30
 
 # How much memory is needed (per node)
-#SBATCH --mem=40GB
+#SBATCH --mem=60GB
 
 # set a partition
-#SBATCH --partition normal
+#SBATCH --partition long
 
 # set max wallclock time
-#SBATCH --time=08:00:00
+#SBATCH --time=20:00:00
 
 # set name of job
 #SBATCH --job-name=nndm
@@ -30,4 +30,4 @@
 # run the application
 module add palma/2021a
 module add foss R GDAL
-R CMD BATCH --vanilla CV_nndm_new.R
+R CMD BATCH --vanilla CV_nndm.R

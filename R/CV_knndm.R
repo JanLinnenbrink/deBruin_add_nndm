@@ -25,7 +25,7 @@ samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular",
 infolder <- "./samples"
 outfolder <- "./CVresults"
 startseed <- 1234567
-n_CV   <- 3  # number of cross validation replications
+n_CV   <- 100  # number of cross validation replications
 n_samp <- 100  # number of sample replicates (for each design)
 cores <- 20
 
@@ -33,8 +33,8 @@ cores <- 20
 if(!dir.exists(outfolder))
   dir.create(outfolder)
 
-if(!dir.exists(paste0(outfolder, "/knndm")))
-  dir.create(paste0(outfolder, "/knndm"))
+if(!dir.exists(paste0(outfolder, "/knndm_5k")))
+  dir.create(paste0(outfolder, "/knndm_5k"))
 
 
 # ************ FUNCTIONS ***************
@@ -48,12 +48,16 @@ sumSquares <- function(ref, pred){
 
 knndmCV <- function(smpl, number, variate, seed){
   
+  fname  <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".Rdata")
+  f_out  <- file.path(outfolder,"knndm_5k", fname)
+  
+  if(!file.exists(f_out)) {
   fname <- paste0(variate, "data", sprintf("%03d", number), ".Rdata")
   f_in <- file.path(infolder,smpl,fname)
   load(f_in)
   
   # load ppoints
-  load(file.path(infolder, "/ppoints.Rdata"))
+  load(file.path(infolder, "ppoints.Rdata"))
   
   MEC=RMSE=time=WS=time_mod <- numeric(n_CV)
   
@@ -73,12 +77,12 @@ knndmCV <- function(smpl, number, variate, seed){
     SST <- 0
     
     set.seed(seed)
-    time[i_CV] <- system.time(knndm <- knndm(pts_sf, ppoints = ppoints))[[3]]
-    WS[i_CV] <- knndm$stat
+    time[i_CV] <- system.time(knndm <- knndm(pts_sf, ppoints = ppoints, k = 4, maxp = 0.8))[[3]]
+    WS[i_CV] <- knndm$W
     fold <- knndm$clusters
     
     set.seed(seed)
-    time_mod[i_CV] <- system.time(for(k in 1:length(unique(fold))){
+    for(k in 1:length(unique(fold))){
       if(variate == "AGB"){
         RFmodel <- ranger(agb~., AGBdata[fold != k,], 
                           respect.unordered.factors=TRUE)
@@ -91,19 +95,20 @@ knndmCV <- function(smpl, number, variate, seed){
         preds  <- predict(RFmodel, OCSdata[fold == k,])$predictions
       }
       
+      
+      # rmse function (global_Val)
       squares <- sumSquares(refs, preds)
       SSR <- SSR + squares[1]
       SST <- SST + squares[2]
-    })[[3]]
+    }
     
     MEC[i_CV]  <- 1 - SSR/SST
     RMSE[i_CV] <- sqrt(SSR/n)
     seed <- seed + 1
   } # loop over i_CV
   
-  fname  <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".Rdata")
-  f_out  <- file.path(outfolder,"knndm", fname)
   save(MEC, RMSE, time, time_mod, WS, file=f_out)
+} 
 }
 
 

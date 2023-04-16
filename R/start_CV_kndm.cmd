@@ -7,13 +7,13 @@
 #SBATCH --ntasks-per-node 20
 
 # How much memory is needed (per node)
-#SBATCH --mem=30GB
+#SBATCH --mem=120GB
 
 # set a partition
-#SBATCH --partition normal
+#SBATCH --partition long
 
 # set max wallclock time
-#SBATCH --time=00:40:00
+#SBATCH --time=60:00:00
 
 # set name of job
 #SBATCH --job-name=kndm

@@ -18,6 +18,7 @@ library(parallel)
 
 # ************ GLOBALS ***************
 setwd("/scratch/tmp/jlinnenb/deBruin_add_nndm/")
+#setwd("C:/0_Msc_Loek/Z_Palma/deBruin_add_nndm/")
 
 samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
@@ -27,87 +28,90 @@ outfolder <- "./CVresults"
 startseed <- 1234567
 n_CV   <- 3  # number of cross validation replications
 n_samp <- 100  # number of sample replicates (for each design)
-cores <- 20
+cores <- 30
 
 # create outfolders if they don't exist
 if(!dir.exists(outfolder))
   dir.create(outfolder)
 
-if(!dir.exists(paste0(outfolder, "/nndm_test")))
-  dir.create(paste0(outfolder, "/nndm_test"))
+if(!dir.exists(paste0(outfolder, "/nndm")))
+  dir.create(paste0(outfolder, "/nndm"))
 
 
 # ************ FUNCTIONS ***************
 
 sumSquares <- function(ref, pred){
-  muref <- mean(ref, na.rm=T)
   SSR <- sum((ref - pred)^2)
-  SST <- sum((ref - muref)^2)
-  return(c(SSR, SST))
+  return(SSR)
+  # cannot calculate muref, since only 1 prediction (loocv)
 }
 
 nndmCV <- function(smpl, number, variate, seed){
+  fname  <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".Rdata")
+  f_out  <- file.path(outfolder,"nndm", fname)
   
- 
-  fname <- paste0(variate, "data", sprintf("%03d", number), ".Rdata")
-  f_in <- file.path(infolder,smpl,fname)
-  load(f_in)
-  
-  # load ppoints
-  load(file.path(infolder, "ppoints.Rdata"))
-  
-  MEC=RMSE=time=WS <- numeric(n_CV)
-  
-  if(variate == "AGB"){
-    pts_df <- data.frame(x=AGBdata$xcoord * 1000, y=AGBdata$ycoord * 1000)
-    pts_sf <- st_as_sf(pts_df, coords = c("x","y"), crs = st_crs(ppoints))
-  } else {
-    pts_df <- data.frame(x=OCSdata$xcoord * 1000, y=OCSdata$ycoord * 1000)
-    pts_sf <- st_as_sf(pts_df, coords = c("x","y"), crs = st_crs(ppoints))
-  }
-  
-  n <- length(pts_df$x)
-  
-  for(i_CV in 1:n_CV){
-  
-    SSR <- 0
-    SST <- 0
+  if(!file.exists(f_out)) {
+    fname <- paste0(variate, "data", sprintf("%03d", number), ".Rdata")
+    f_in <- file.path(infolder,smpl,fname)
+    load(f_in)
     
-    set.seed(seed)
-    time[i_CV] <- system.time(nndm <- nndm(pts_sf, ppoints = ppoints))[[3]]
-    WS[i_CV] <- twosamples::wass_stat(nndm$Gjstar, nndm$Gij)
-    fold <- 1:nrow(pts_df)
+    # load ppoints
+    load(file.path(infolder, "ppoints.Rdata"))
     
-    set.seed(seed)
-    for(k in 1:fold){
-      lo <- nndm$indx_exclude[[k]]
-      if(variate == "AGB"){
-        RFmodel <- ranger(agb~., AGBdata[fold == k,], 
-                          respect.unordered.factors=TRUE)
-        refs <- AGBdata$agb[fold != k & fold != lo] 
-        preds  <- predict(RFmodel, AGBdata[fold == k,])$predictions
-      } else{
-        RFmodel <- ranger(ocs~., OCSdata[fold != k,], 
-                          respect.unordered.factors=TRUE)
-        refs <- OCSdata$ocs[fold == k] 
-        preds  <- predict(RFmodel, OCSdata[fold == k,])$predictions
-      }
-      
-      squares <- sumSquares(refs, preds)
-      SSR <- SSR + squares[1]
-      SST <- SST + squares[2]
+    RMSE=time=WS=time_mod <- numeric(n_CV)
+    
+    if(variate == "AGB"){
+      pts_df <- data.frame(x=AGBdata$xcoord * 1000, y=AGBdata$ycoord * 1000)
+      pts_sf <- st_as_sf(pts_df, coords = c("x","y"), crs = st_crs(ppoints)) #### only first 20 rows
+    } else {
+      pts_df <- data.frame(x=OCSdata$xcoord * 1000, y=OCSdata$ycoord * 1000)
+      pts_sf <- st_as_sf(pts_df, coords = c("x","y"), crs = st_crs(ppoints))
     }
     
-    MEC[i_CV]  <- 1 - SSR/SST
-    RMSE[i_CV] <- sqrt(SSR/n)
-    seed <- seed + 1
-  } # loop over i_CV
+    
+    n <- length(pts_df$x)
+    
+    for(i_CV in 1:n_CV){
+      
+      SSR <- 0
+      SST <- 0
+      
+      set.seed(seed)
+      time[i_CV] <- system.time(nndm <- nndm(pts_sf, ppoints = ppoints))[[3]]
+      WS[i_CV] <- twosamples::wass_stat(nndm$Gjstar, nndm$Gij)
+      fold <- 1:nrow(pts_sf)
+      
+      set.seed(seed)
+      time_mod[i_CV] <- system.time(for(k in fold){
+        lo <- nndm$indx_exclude[[k]]
+        if(length(lo)<1) lo <- 0
+        
+        if(variate == "AGB"){
+          RFmodel <- ranger(agb~., AGBdata[fold != k & !(fold %in% lo),], 
+                            respect.unordered.factors=TRUE)
+          refs <- AGBdata$agb[fold == k] 
+          preds  <- predict(RFmodel, AGBdata[fold == k,])$predictions
+        } else{
+          RFmodel <- ranger(ocs~., OCSdata[fold != k & !(fold %in% lo),], 
+                            respect.unordered.factors=TRUE)
+          refs <- OCSdata$ocs[fold == k] 
+          preds  <- predict(RFmodel, OCSdata[fold == k,])$predictions
+        }
+        
+        squares <- sumSquares(refs, preds)
+        SSR <- SSR + squares
+      })[[3]]
+      
+      # cannot calculate MEC (no muref)
+      RMSE[i_CV] <- sqrt(SSR/n)
+      seed <- seed + 1
+      print(RMSE)
+    } # loop over i_CV
+    
+    save(RMSE, time, time_mod, WS, file=f_out)
+  }
   
-  fname  <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".Rdata")
-  f_out  <- file.path(outfolder,"nndm_test", fname)
-  save(MEC, RMSE, time, WS, file=f_out)
 }
-
 
 # ************ CALL THE FUNCTIONS ************ 
 mclapply(seq(n_samp), function(i) {

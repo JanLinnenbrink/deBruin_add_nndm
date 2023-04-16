@@ -2,30 +2,17 @@
 The following have been reloaded with a version change:
   1) palma/2019a => palma/2021a
 
-slurmstepd: error: *** JOB 13302635 ON r01n33 CANCELLED AT 2023-01-09T12:00:22 ***
+slurmstepd: error: *** JOB 13702189 ON r08n16 CANCELLED AT 2023-02-18T00:27:30 DUE TO TIME LIMIT ***
 ################################# JOB REPORT ##################################
-Job ID: 13302635
+Job ID: 13702189
 Cluster: palma2
 User/Group: jlinnenb/u0dawin
-State: CANCELLED (exit code 0)
+State: TIMEOUT (exit code 0)
 Nodes: 1
 Cores per node: 20
-CPU Utilized: 00:03:46
-CPU Efficiency: 37.67% of 00:10:00 core-walltime
-Job Wall-clock time: 00:00:30
-Memory Utilized: 8.37 GB
-Memory Efficiency: 27.89% of 30.00 GB
-###############################################################################
-################################# JOB REPORT ##################################
-Job ID: 13302629
-Cluster: palma2
-User/Group: jlinnenb/u0dawin
-State: COMPLETED (exit code 0)
-Nodes: 1
-Cores per node: 20
-CPU Utilized: 07:09:34
-CPU Efficiency: 96.53% of 07:25:00 core-walltime
-Job Wall-clock time: 00:22:15
-Memory Utilized: 9.56 GB
-Memory Efficiency: 31.88% of 30.00 GB
+CPU Utilized: 49-01:07:28
+CPU Efficiency: 98.09% of 50-00:00:40 core-walltime
+Job Wall-clock time: 2-12:00:02
+Memory Utilized: 32.95 GB
+Memory Efficiency: 27.46% of 120.00 GB
 ###############################################################################

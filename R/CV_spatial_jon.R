@@ -34,17 +34,6 @@ if(!dir.exists(paste0(outfolder, "/spatial")))
 
 # ************ FUNCTIONS ***************
 
-err_fu <- function(obs, pred){
-  rmse <- sqrt(mean((obs-pred)^2))
-  muref <- mean(obs)
-  SSR <- sum((obs - pred)^2)
-  SST <- sum((obs - muref)^2)
-  mec <- 1 - SSR/SST
-  me <- mean(obs - pred)
-  list(me = me, rmse = rmse, mec = mec)
-}
-
-
 predfun <- function(object, newdata){
   pred <- predict(object, newdata)
   pred[[1]]
@@ -60,7 +49,8 @@ spatialCV <- function(smpl, number, variate, seed){
   if(variate == "AGB"){
     fo <- as.formula(paste0("agb~", paste(names(AGBdata)[-1], collapse = "+")))
     tst <- sperrorest(fo, data=AGBdata, model_fun=ranger, 
-                      model_args=list(respect.unordered.factors=TRUE),
+                      model_args=list(respect.unordered.factors=TRUE,
+                                      mtry=4, splitrule="variance", min.node.size=5),
                       pred_fun=predfun, 
                       smp_fun=partition_kmeans, coords=c("xcoord", "ycoord"),
                       smp_args=list(balancing_steps = 1, seed1=seed, 
@@ -69,7 +59,8 @@ spatialCV <- function(smpl, number, variate, seed){
   } else{
     fo <- as.formula(paste0("ocs~", paste(names(OCSdata)[-1], collapse = "+")))
     tst <- sperrorest(fo, data=OCSdata, model_fun=ranger, 
-                      model_args=list(respect.unordered.factors=TRUE),
+                      model_args=list(respect.unordered.factors=TRUE,
+                                      mtry=4, splitrule="variance", min.node.size=5),
                       pred_fun=predfun, 
                       smp_fun=partition_kmeans, coords=c("xcoord", "ycoord"),
                       smp_args=list(balancing_steps = 1, seed1=seed, 

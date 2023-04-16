@@ -6,18 +6,21 @@
 # Science and Remote Sensing, email: sytze.debruin@wur.nl
 # May 3, 2022
 # *****************************************************************************
+#Sys.sleep(round(runif(1,min=1,max=240)))
 # ****** load required libraries *******
-.libPaths("/home/j/jlinnenb/r_packages")
+#.libPaths("/home/j/jlinnenb/r_packages")
 library(ranger)
 library(terra)
 library(parallel)
+library(caret)
+library(CAST)
 
 # ************ GLOBALS ***************
 samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
-infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
-infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/samples"
-outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults"
+infolder1 <- "~/CrossValidation/deBruin_add_nndm/data"
+infolder2 <- "~/CrossValidation/deBruin_add_nndm/samples"
+outfolder <- "~/CrossValidation/deBruin_add_nndm/CVresults"
 startseed <- 1234567
 n_samp    <- 100  # number of sample replicates (for each design)
 
@@ -30,17 +33,16 @@ if(!dir.exists(paste0(outfolder, "/exhaustive")))
   dir.create(paste0(outfolder, "/exhaustive"))
 
 if(!file.exists(file.path(outfolder, "exhaustive", "runs.csv"))) {
-  write.csv(data.frame("runs"=0), file.path(outfolder, "exhaustive", "runs.csv"))
+  write.csv(data.frame("runs"=1), file.path(outfolder, "exhaustive", "runs.csv"), row.names = FALSE)
 }
 
 csv_file <- file.path(outfolder, "exhaustive", "runs.csv")
 runs <- read.csv(csv_file)
 lastIndex <- runs[nrow(runs),1]
-thisIndex <- 86
+thisIndex <- lastIndex + 1
 print(paste0("this Index is: ", thisIndex))
 runs[thisIndex,1] <- thisIndex
 write.csv(runs, file = csv_file, row.names = FALSE)
-
 
 # download data from https://doi.org/10.5281/zenodo.6513429
 # ****** load input raster data ******
@@ -92,29 +94,30 @@ exhaustive <- function(smpl, number, variate, seed){
   load(f_in)
   
   set.seed(seed)
-  
   if(variate == "AGB"){
-    RFmodel <- ranger(agb~., AGBdata, 
-                      respect.unordered.factors=TRUE)
-    # print(names(AGBdata[,c(2:23)]))
-    # map  <- predict(AGBstack, RFmodel, predfun, filename=f_out, overwrite=T, na.rm=T)
-    map  <- predict(AGBstack, RFmodel, predfun, na.rm=T)
-    ME   <- mefu(AGB, map)
-    RMSE <- rmsefu(AGB, map)
-    MEC  <- mecfu(AGB, map)
-  } else {
-    RFmodel <- ranger(ocs~., OCSdata, 
-                      respect.unordered.factors=TRUE)
-    map  <- predict(OCSstack, RFmodel, predfun, filename=f_out, overwrite=T,
-                    na.rm=T)
-    ME   <- mefu(OCS, map)
-    RMSE <- rmsefu(OCS, map)
-    MEC  <- mecfu(OCS, map)
+    
+    mtry <- floor(sqrt(ncol(AGBdata[,-1])))
+    pgrid <- expand.grid(splitrule="variance",min.node.size=5,mtry=mtry)
+    RFmodel <- caret::train(agb~., AGBdata,respect.unordered.factors=TRUE, method = "ranger",
+                                 tuneGrid=pgrid, num.trees=500,
+                                 trControl = trainControl(method = "cv", savePredictions = "final"))
+    
+  } else{
+    
+    
+    mtry <- floor(sqrt(ncol(OCSdata[,-1])))
+    pgrid <- expand.grid(splitrule="variance",min.node.size=5,mtry=mtry)
+    RFmodel <- caret::train(ocs~., OCSdata,respect.unordered.factors=TRUE, method = "ranger",
+                                 tuneGrid=pgrid, ntree=500, 
+                                 trControl = trainControl(method = "cv", savePredictions = "final"))
   }
+  
+  err_rand_caret <- global_validation(RFmodel)
+  RMSE <- err_rand_caret[[1]]
   
   fname <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".Rdata")
   f_out2 <- file.path(outfolder,"exhaustive", fname)
-  save(MEC, ME, RMSE, file=f_out2)
+  save(RMSE, file=f_out2)
   file.remove(f_out)
 }
 
@@ -122,7 +125,7 @@ exhaustive <- function(smpl, number, variate, seed){
 # ************ CALL THE FUNCTIONS ************ 
 mclapply(list("AGB", "OCS"), function(x) {
   for(smpl in samples) {
-    i <- 86
+    i <- thisIndex
     exhaustive(smpl, i, x, startseed)
   }
-}, mc.cores = 2)
+}, mc.cores = 10)
