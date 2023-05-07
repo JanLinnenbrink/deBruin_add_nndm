@@ -8,7 +8,7 @@
 # *****************************************************************************
 
 # ****** load required library *******
-#.libPaths("/home/j/jlinnenb/r_packages/")
+.libPaths("/home/j/jlinnenb/r_packages/")
 library(ranger)
 library(CAST)
 library(sf)
@@ -17,7 +17,7 @@ library(caret)
 library(parallel)
 
 # ************ GLOBALS ***************
-#setwd("/scratch/tmp/jlinnenb/deBruin_add_nndm/")
+setwd("/scratch/tmp/jlinnenb/deBruin_add_nndm/")
 
 samples   <- c("clusterMedium", "clusterStrong", "clusterGapped", "regular", 
                "simpleRandom")
@@ -60,12 +60,12 @@ knndmCV <- function(smpl, number, variate, seed){
     }
     
     n <- length(pts_df$x)
-    RMSE <- numeric(n_CV)
+    RMSE=time=time_mod <- numeric(n_CV)
     
     for(i_CV in 1:n_CV){
       
       set.seed(seed)
-      knndm <- knndm(pts_sf, ppoints = ppoints, k = 10, maxp = 0.8)
+      time[i_CV] <- system.time(knndm <- knndm(pts_sf, ppoints = ppoints, k = 10, maxp = 0.8))
       trControl = trainControl(method = "cv", savePredictions = "final",
                                index=knndm$indx_train)
       
@@ -73,20 +73,24 @@ knndmCV <- function(smpl, number, variate, seed){
       if(variate == "AGB"){
         
         AGBdata$glc2017 <- as.factor(AGBdata$glc2017)
-        mtry <- floor(sqrt(ncol(AGBdata[,-1])))
+        mtry <- 4
         pgrid <- expand.grid(splitrule="variance",min.node.size=5,mtry=mtry)
-        RFmodel <- caret::train(agb~., AGBdata,respect.unordered.factors=TRUE, method = "ranger",
+        time_mod[i_CV] <- system.time(RFmodel <- caret::train(agb~., AGBdata,
+                                                        respect.unordered.factors=TRUE, 
+                                                        method = "ranger",
                                 tuneGrid=pgrid, num.trees=500,
-                                trControl = trControl)
+                                trControl = trControl))[[3]]
         
       } else{
         
         
-        mtry <- floor(sqrt(ncol(OCSdata[,-1])))
+        mtry <- 4
         pgrid <- expand.grid(splitrule="variance",min.node.size=5,mtry=mtry)
-        RFmodel <- caret::train(ocs~., OCSdata,respect.unordered.factors=TRUE, method = "ranger",
+        time_mod[i_CV] <- system.time(RFmodel <- caret::train(ocs~., OCSdata,
+                                                              respect.unordered.factors=TRUE,
+                                                              method = "ranger",
                                 tuneGrid=pgrid, num.trees=500, 
-                                trControl = trControl)
+                                trControl = trControl))[[3]]
       }
       
       
@@ -95,7 +99,7 @@ knndmCV <- function(smpl, number, variate, seed){
       seed <- seed + 1
     } # loop over i_CV
     
-    save(RMSE, file=f_out)
+    save(RMSE, time, time_mod, file=f_out)
   } 
 }
 
