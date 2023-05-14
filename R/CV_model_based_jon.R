@@ -1,4 +1,3 @@
-current_index <- 401:450
 # *****************************************************************************
 # R Script implementing homoscedastic model-based based cross-validation.  
 # Related to the paper "Dealing with clustered samples for assessing map 
@@ -20,7 +19,7 @@ library(parallel)
 
 # ************ GLOBALS ***************
 infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
-infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/random"
+infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/random_caret_new"
 outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/modelbased"
 
 nsim <- 200 # number of sequential Gaussian simulations
@@ -89,7 +88,6 @@ sf_pnts <- sf_pnts[-nanID,]
 
 # find files with all design realizations
 f_ins <- list.files(infolder2, glob2rx("pts*.Rdata"))
-f_ins <- f_ins[current_index]
 
 # loop over all files
 mclapply(f_ins, function(f_in) {

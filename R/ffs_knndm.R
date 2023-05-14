@@ -8,7 +8,7 @@
 # *****************************************************************************
 
 # ****** load required library *******
-Sys.sleep(round(runif(1, min = 1, max = 240)))
+#Sys.sleep(round(runif(1, min = 1, max = 240)))
 
 .libPaths("/home/j/jlinnenb/r_packages/")
 library(ranger)
@@ -117,7 +117,7 @@ knndmCV <- function(smpl, number, variate, seed){
   #variate="AGB"
   #seed=1
   
-  message("start")
+  message(paste0("number ", seed))
   
   fname  <-  paste0(variate, "_", smpl, sprintf("%03d", number), ".csv")
   f_out  <- file.path(outfolder,"ffs_knndm", fname)
@@ -187,20 +187,15 @@ knndmCV <- function(smpl, number, variate, seed){
       if(any(c("xcoord", "ycoord") %in% f_sel_var)) {
         xy_as_predictor <- "1"
         xy_imp <- varImp(f_mod)$importance
-        xy_imp <- sum(xy_imp$importance[rownames(xy_imp$importance) %in% c("xcoord", "ycoord"),])
+        xy_imp <- sum(xy_imp$importance[rownames(xy_imp$importance) %in% c("xcoord", "ycoord"),], na.rm=TRUE)
         
       } else xy_as_predictor <- "0"; xy_imp <- 0
       
       n_sel_vars <- length(f_sel_var)
       
-      print(f_sel_var)
-      print(AGBstack)
-      print(f_mod)
-      
+      message("predicting ffs model")
       map_ffs  <- terra::predict(AGBstack[[f_sel_var]], f_mod, 
                                  filename=f_out_p, overwrite=TRUE, na.rm=TRUE)
-      
-      print(map_ffs)
       
       true_ME_ffs   <- mefu(AGB, map_ffs)
       true_RMSE_ffs <- rmsefu(AGB, map_ffs)
@@ -210,8 +205,11 @@ knndmCV <- function(smpl, number, variate, seed){
       
       diff_RMSE_ffs <- (CV_RMSE_ffs-true_RMSE_ffs)/true_RMSE_ffs*100
       
+      message("calculating AOA for FFS model")
       AOA_AGB_ffs <- AOA_perc(AGBstack[[f_sel_var]], f_mod,
                               indexTrain = knndm$indx_train)
+      
+      message("setting values outside AOA to NA")
       map_ffs[AOA_AGB_ffs[[2]] == 0] <- NA
       true_ME_ffs_inAOA   <- mefu(AGB, map_ffs)
       true_RMSE_ffs_inAOA <- rmsefu(AGB, map_ffs)
@@ -221,10 +219,11 @@ knndmCV <- function(smpl, number, variate, seed){
       
       AOA_stats_ffs <- AOA_AGB_ffs[[1]]
       
-      
+      message("training model without FFS")
       mod <- train(AGBdata[,names(AGBdata) != "agb"], y = AGBdata[,names(AGBdata) == "agb"],
                    respect.unordered.factors=TRUE, method = "ranger", importance="permutation",
                    tuneGrid=pgrid, num.trees=500, trControl = trControl)
+      message("predicting normal model")
       map  <- terra::predict(AGBstack, mod, filename=f_out_p, overwrite=TRUE, na.rm=TRUE)
       true_ME  <- mefu(AGB, map)
       true_RMSE <- rmsefu(AGB, map)
@@ -232,9 +231,10 @@ knndmCV <- function(smpl, number, variate, seed){
       
       CV_RMSE <- global_validation(mod)[[1]]
       diff_RMSE <- (CV_RMSE-true_RMSE)/true_RMSE * 100
-      
+      message("calculating AOA without FFS")
       AOA_AGB <- AOA_perc(AGBstack, mod,
                           indexTrain = knndm$indx_train)
+      message("setting values outside AOA to NA (without FFS)")
       map[AOA_AGB[[2]] == 0] <- NA
       true_ME_inAOA   <- mefu(AGB, map)
       true_RMSE_inAOA <- rmsefu(AGB, map)
@@ -246,7 +246,7 @@ knndmCV <- function(smpl, number, variate, seed){
       
     } else{
       
-      
+      message("starting OCS")
       mtry <- 4
       pgrid <- expand.grid(splitrule="variance",min.node.size=5,mtry=mtry)
       
@@ -270,7 +270,7 @@ knndmCV <- function(smpl, number, variate, seed){
       if(any(c("xcoord", "ycoord") %in% f_sel_var)) {
         xy_as_predictor <- "1"
         xy_imp <- varImp(f_mod)$importance
-        xy_imp <- sum(xy_imp$importance[rownames(xy_imp$importance) %in% c("xcoord", "ycoord"),])
+        xy_imp <- sum(xy_imp$importance[rownames(xy_imp$importance) %in% c("xcoord", "ycoord"),], na.rm=TRUE)
         
       } else xy_as_predictor <- "0"; xy_imp <- 0
       
@@ -313,7 +313,7 @@ knndmCV <- function(smpl, number, variate, seed){
       diff_RMSE_inAOA <- (CV_RMSE-true_RMSE_inAOA)/true_RMSE_inAOA*100
       
       AOA_stats <- AOA_OCS[[1]]
-      
+      message(paste0("OCS stats:", AOA_stats))
       
     }
     

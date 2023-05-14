@@ -104,10 +104,7 @@ exhaustive <- function(smpl, number, variate, seed){
     pgrid <- expand.grid(mtry=mtry, splitrule="variance", min.node.size=5)
     RFmodel <- caret::train(agb~., AGBdata,respect.unordered.factors=TRUE, method = "ranger",
                             tuneGrid=pgrid, num.trees=500)
-    message("predicting AGB")
-    
     map  <- terra::predict(AGBstack, RFmodel, filename=f_out, overwrite=TRUE, na.rm=TRUE)
-    message("AGB prediction done")
     ME   <- mefu(AGB, map)
     RMSE <- rmsefu(AGB, map)
     MEC  <- mecfu(AGB, map)

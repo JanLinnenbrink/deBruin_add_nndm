@@ -144,7 +144,7 @@ ggsave(file.path(outfolder, "comp_global.pdf"), bpl, height = unit(8, "cm"), wid
 
 ## density
 # global validation results in under/overestimation of map error in random - regualar cases
-(pl <- ggplot(data=outtab[outtab$method %in% c("random_caret_new", "nndm_caret", "knndm_caret"),], aes(fill=method)) +
+(pl <- ggplot(data=outtab[outtab$method %in% c("nndm_caret", "knndm_caret"),], aes(fill=method)) +
     geom_density(aes(y=rRMSE), alpha=0.5) +
     geom_hline(yintercept = 0) +
     scale_y_continuous(limits=c(-60,60)) +
@@ -179,4 +179,14 @@ tp <- ggplot(time_stats_all, aes(x=method)) +
 
 tp
 ggsave("material/time.pdf", tp, height=5, width=10)
+
+
+
+
+
+# ffs ---------------------------------------------------------------------
+
+
+read.csv("CVresults/ffs_knndm/ffs_knndm/AGB_clusterGapped004.csv")
+warnings()
 

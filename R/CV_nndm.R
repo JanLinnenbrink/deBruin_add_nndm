@@ -79,9 +79,27 @@ nndmCV <- function(smpl, number, variate, seed){
       set.seed(seed)
       time[i_CV] <- system.time(nndm <- nndm(pts_sf, ppoints = ppoints))[[3]]
       WS[i_CV] <- twosamples::wass_stat(nndm$Gjstar, nndm$Gij)
-      fold <- 1:nrow(pts_sf)
+      
+      trControl <- trainControl(method = "cv", savePredictions = "final",
+                                index=nndm$indx_train, indexOut = nndm$indx_test)
       
       set.seed(seed)
+      if(variate == "AGB"){
+        AGBdata$glc2017 <- as.factor(AGBdata$glc2017)
+        pgrid <- expand.grid(splitrule="variance",min.node.size=5,mtry=4)
+        time_mod[i_CV] <- system.time(RFmodel <- caret::train(agb~., AGBdata,
+                                                              respect.unordered.factors=TRUE, 
+                                                              method = "ranger",
+                                                              tuneGrid=pgrid, num.trees=500,
+                                                              trControl = trControl))[[3]]
+      } else{
+        RFmodel <- ranger(ocs~., OCSdata[fold != k & !(fold %in% lo),], 
+                          respect.unordered.factors=TRUE)
+        refs <- OCSdata$ocs[fold == k] 
+        preds  <- predict(RFmodel, OCSdata[fold == k,])$predictions
+      }
+      
+      
       time_mod[i_CV] <- system.time(for(k in fold){
         lo <- nndm$indx_exclude[[k]]
         if(length(lo)<1) lo <- 0

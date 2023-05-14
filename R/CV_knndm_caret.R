@@ -65,7 +65,12 @@ knndmCV <- function(smpl, number, variate, seed){
     for(i_CV in 1:n_CV){
       
       set.seed(seed)
-      time[i_CV] <- system.time(knndm <- knndm(pts_sf, ppoints = ppoints, k = 10, maxp = 0.8))
+      tune_grid <- data.frame(k=2:10, maxp=seq(0.8,0.5,length.out=9))
+      kndm <- apply(tune_grid, 1, function(x) knndm(pts_sf, ppoints = ppoints, k=x[[1]], maxp=x[[2]]))
+      W_min <- lapply(kndm, function(x) x$W) |> 
+        which.min()
+      knndm <- kndm[[W_min]]
+      
       trControl = trainControl(method = "cv", savePredictions = "final",
                                index=knndm$indx_train)
       

@@ -20,13 +20,17 @@ library(CAST)
 
 infolder1 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/data"
 infolder2 <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/random"
-outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/intensity"
+outfolder <- "/scratch/tmp/jlinnenb/deBruin_add_nndm/CVresults/intensity_caret"
+
+infolder1 <- "~/CrossValidation/deBruin_add_nndm/data"
+infolder2 <- "~/CrossValidation/deBruin_add_nndm/CVresults/random"
+outfolder <- "~/CrossValidation/deBruin_add_nndm/CVresults/intensity_caret"
 
 CRSlaea   <- paste0("+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 ",
                     "+ellps=GRS80 +units=m +no_defs")
 
 n_CV      <- 3 # number of cross validation replications
-cores     <- 20
+cores     <- 10
 
 
 # check whether infolder2 exists; if not, stop
@@ -81,7 +85,7 @@ mclapply(f_ins, function(f_in) {
   variate <- substr(f_in, 4, 6)
   design <- substr(f_in, 8, lchar-9)
   number <- substr(f_in, lchar-8, lchar-6)
-  ref_in <- file.path("../samples", design,
+  ref_in <- file.path("~/CrossValidation/deBruin_add_nndm/samples", design,
                       paste0(variate, "data", number, ".Rdata"))
   
   # load CV data
